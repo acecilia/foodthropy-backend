@@ -4,7 +4,7 @@ let package = Package(
     name: "foodthropy-backend",
     targets: [
         Target(name: "App"),
-        Target(name: "Run", dependencies: ["App"]),
+        Target(name: "Run", dependencies: ["App"])
     ],
     dependencies: [
         .Package(url: "https://github.com/vapor/vapor.git", majorVersion: 2),
@@ -17,7 +17,7 @@ let package = Package(
         "Database",
         "Localization",
         "Public",
-        "Resources",
+        "Resources"
     ]
 )
 
