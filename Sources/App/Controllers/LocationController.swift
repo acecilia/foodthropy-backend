@@ -12,7 +12,7 @@ extension LocationController: DummyFillable {
             // Reset id count
             try Location.database?.raw("ALTER SEQUENCE locations_id_seq RESTART WITH 1")
             
-            for number in 1...10 {
+            for number in 1...200 {
                 if let name = nf.string(from: NSNumber(value: number)) {
                     try Location(name: name).save()
                 }

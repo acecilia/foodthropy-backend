@@ -11,12 +11,9 @@ class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updatea
     
     /// When users call 'GET' on the index path, it should return an index of all available posts
     func index(_ req: Request) throws -> ResponseRepresentable {
-        if let page = req.query?["page"]?.int {
-            let count = req.query?["count"]?.int ?? 10
-            return try T.paginator(count, page: page, request: req)
-        } else {
-            return try T.all().makeJSON()
-        }
+        let page = req.query?["page"]?.int ?? 1
+        let count = req.query?["count"]?.int ?? 20
+        return try T.paginator(count, page: page, request: req)
     }
 
     /// When consumers call 'POST' on the index path with valid JSON, construct and save the post
