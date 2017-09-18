@@ -20,6 +20,7 @@ extension Droplet {
 
         get("description") { req in return req.description }
         
+        try LocationController.dummyFill()
         try resource("locations", LocationController.self)
     }
 }
