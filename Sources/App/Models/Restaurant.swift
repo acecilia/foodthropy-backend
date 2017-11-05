@@ -8,7 +8,7 @@ final class Restaurant: Model {
     static let idKey = "id"
     static let nameKey = "name"
     static let ratingsKey = "ratings"
-    static let averageRatingKey = "averageRating"
+    static let averageRatingKey = "average_rating"
     
     var name: String
     var location: Location {
