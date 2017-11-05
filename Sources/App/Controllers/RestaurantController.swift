@@ -13,7 +13,6 @@ final class RestaurantController: DefaultController<Restaurant> {
     }
 }
 
-/*
 extension RestaurantController: DummyFillable {
     static func dummyFill() throws {
         try Restaurant.makeQuery().delete()
@@ -28,6 +27,5 @@ extension RestaurantController: DummyFillable {
         }
     }
 }
- */
 
 
