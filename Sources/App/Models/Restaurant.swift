@@ -15,8 +15,10 @@ final class Restaurant: Model {
         return try! parent(id: locationId).get()!
     }
     fileprivate var locationId: Identifier
-    private var ratings: [Int]
-    var averageRating: Double = 0
+    private var ratings: [Int] {
+        didSet { setAverageRating() }
+    }
+    var averageRating: Double?
     
     init(name: String, locationId: Identifier) {
         self.name = name
@@ -40,8 +42,7 @@ final class Restaurant: Model {
         return row
     }
     
-    func addRating(_ rating: Int) {
-        ratings.append(rating)
+    private func setAverageRating() {
         averageRating = ratings.isEmpty ? 0 : Double(ratings.reduce(0, +)) / Double(ratings.count)
     }
 }
@@ -53,7 +54,7 @@ extension Restaurant: Preparation {
             builder.string(Restaurant.nameKey)
             builder.foreignId(for: Location.self)
             builder.custom(Restaurant.ratingsKey, type: "INTEGER[]")
-            builder.double(Restaurant.averageRatingKey)
+            builder.double(Restaurant.averageRatingKey, optional: true)
         }
     }
     
