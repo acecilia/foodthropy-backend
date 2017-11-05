@@ -52,8 +52,8 @@ extension Restaurant: Preparation {
             builder.id()
             builder.string(Restaurant.nameKey)
             builder.foreignId(for: Location.self)
-            builder.string(Restaurant.ratingsKey)
-            builder.string(Restaurant.averageRatingKey)
+            builder.custom(Restaurant.ratingsKey, type: "INTEGER[]")
+            builder.double(Restaurant.averageRatingKey)
         }
     }
     

@@ -20,7 +20,12 @@ extension Droplet {
 
         get("description") { req in return req.description }
         
+        try RestaurantController.delete()
+        try LocationController.delete()
+        
         try LocationController.dummyFill()
+        try RestaurantController.dummyFill()
+        
         try resource("locations", LocationController.self)
         try resource("restaurants", RestaurantController.self)
     }
