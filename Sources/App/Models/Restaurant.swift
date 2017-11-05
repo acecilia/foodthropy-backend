@@ -7,27 +7,42 @@ final class Restaurant: Model {
     
     static let idKey = "id"
     static let nameKey = "name"
+    static let ratingsKey = "ratings"
+    static let averageRatingKey = "averageRating"
     
     var name: String
-    var restaurant: Parent<Restaurant, Location> { return parent(id: locationId) }
-
-    var locationId: Identifier
+    var location: Location {
+        return try! parent(id: locationId).get()!
+    }
+    fileprivate var locationId: Identifier
+    private var ratings: [Int]
+    var averageRating: Double = 0
     
     init(name: String, locationId: Identifier) {
         self.name = name
         self.locationId = locationId
+        self.ratings = []
     }
     
     init(row: Row) throws {
         name = try row.get(Restaurant.nameKey)
         locationId = try row.get(Location.foreignIdKey)
+        ratings = try row.get(Restaurant.ratingsKey)
+        averageRating = try row.get(Restaurant.averageRatingKey)
     }
     
     func makeRow() throws -> Row {
         var row = Row()
         try row.set(Restaurant.nameKey, name)
         try row.set(Location.foreignIdKey, locationId)
+        try row.set(Restaurant.ratingsKey, ratings)
+        try row.set(Restaurant.averageRatingKey, averageRating)
         return row
+    }
+    
+    func addRating(_ rating: Int) {
+        ratings.append(rating)
+        averageRating = ratings.isEmpty ? 0 : Double(ratings.reduce(0, +)) / Double(ratings.count)
     }
 }
 
@@ -37,6 +52,8 @@ extension Restaurant: Preparation {
             builder.id()
             builder.string(Restaurant.nameKey)
             builder.foreignId(for: Location.self)
+            builder.string(Restaurant.ratingsKey)
+            builder.string(Restaurant.averageRatingKey)
         }
     }
     
@@ -58,6 +75,7 @@ extension Restaurant: JSONConvertible {
         try json.set(Restaurant.idKey, id)
         try json.set(Restaurant.nameKey, name)
         try json.set(Location.foreignIdKey, locationId)
+        try json.set(Restaurant.averageRatingKey, averageRating)
         return json
     }
 }
@@ -69,6 +87,14 @@ extension Restaurant: Updateable {
         return [
             UpdateableKey(Restaurant.nameKey, String.self) { $0.name = $1 },
             UpdateableKey(Location.foreignIdKey, Identifier.self) { $0.locationId = $1 }
+            // Fill more properties
         ]
+    }
+}
+
+/// Needed for paginator to work
+extension Restaurant: NodeRepresentable {
+    func makeNode(in context: Context?) throws -> Node {
+        return try makeJSON().makeNode(in: context)
     }
 }

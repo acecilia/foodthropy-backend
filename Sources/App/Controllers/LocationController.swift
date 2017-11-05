@@ -1,5 +1,3 @@
-import Foundation
-
 final class LocationController: DefaultController<Location> { }
 
 extension LocationController: DummyFillable {

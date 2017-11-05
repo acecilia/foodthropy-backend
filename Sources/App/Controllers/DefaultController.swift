@@ -9,11 +9,17 @@ class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updatea
    
     required init() {}
     
+    func makeIndexQuery(fromParameters paramaters: Node?) throws -> Query<T> {
+        return try T.makeQuery()
+    }
+    
     /// When users call 'GET' on the index path, it should return an index of all available posts
     func index(_ req: Request) throws -> ResponseRepresentable {
-        let page = req.query?["page"]?.int ?? 1
-        let count = req.query?["count"]?.int ?? 20
-        return try T.paginator(count, page: page, request: req)
+        var parameters = req.query
+        let page: Int = try parameters?.pop("page") ?? 1
+        let count: Int = try parameters?.pop("pagecount") ?? 20
+
+        return try makeIndexQuery(fromParameters: parameters).paginator(count, page: page, request: req)
     }
 
     /// When consumers call 'POST' on the index path with valid JSON, construct and save the post
@@ -31,12 +37,6 @@ class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updatea
     /// When the consumer calls 'DELETE' on a specific resource, we should remove that resource from the database
     func delete(_ req: Request, resource: T) throws -> ResponseRepresentable {
         try resource.delete()
-        return Response(status: .ok)
-    }
-
-    /// When the consumer calls 'DELETE' on the entire table, we should remove the entire table
-    func clear(_ req: Request) throws -> ResponseRepresentable {
-        try T.makeQuery().delete()
         return Response(status: .ok)
     }
 
@@ -77,8 +77,7 @@ class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updatea
             show: show,
             update: update,
             replace: replace,
-            destroy: delete,
-            clear: clear
+            destroy: delete
         )
     }
 }

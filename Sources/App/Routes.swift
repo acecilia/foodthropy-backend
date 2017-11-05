@@ -22,5 +22,6 @@ extension Droplet {
         
         try LocationController.dummyFill()
         try resource("locations", LocationController.self)
+        try resource("restaurants", RestaurantController.self)
     }
 }
