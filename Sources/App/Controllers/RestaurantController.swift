@@ -2,17 +2,22 @@ import FluentProvider
 
 final class RestaurantController: DefaultController<Restaurant> {
     override func makeIndexQuery(fromParameters paramaters: Node?) throws -> Query<Restaurant> {
-        var query = try super.makeIndexQuery(fromParameters: paramaters)
+        let query: Query<Restaurant>
         
         if let locationId: Int = try paramaters?.get("locationid") {
             if let locationId = try Location.makeQuery().find(locationId) {
-                query = try locationId.children(type: Restaurant.self).makeQuery()
+                query = try locationId.children(type: Restaurant.self)
+                    .makeQuery()
             } else {
-                throw BackendError.locationIdNotFound
+                throw Abort.badRequest
             }
+        } else {
+            query = try Restaurant.makeQuery()
         }
         
-        return query
+        return try query
+            .sort(Restaurant.likesKey, .descending)
+            .sort(Restaurant.nameKey, .ascending)
     }
 }
 
@@ -32,33 +37,3 @@ extension RestaurantController: DummyFillable {
         try Restaurant.database?.raw("ALTER SEQUENCE restaurants_id_seq RESTART WITH 1")
     }
 }
-
-extension RestaurantController {
-    enum BackendError: String, Error, Debuggable {
-        case locationIdNotFound
-        
-        var reason: String {
-            switch self {
-            case .locationIdNotFound: return "The provided location id was not found on the database"
-            }
-        }
-        
-        var identifier: String {
-            return self.rawValue
-        }
-        
-        var possibleCauses: [String] {
-            return []
-        }
-        
-        var suggestedFixes: [String] {
-            switch self {
-            case .locationIdNotFound:
-                return ["Provide an existing location id"]
-            }
-        }
-    }
-}
-
-
-

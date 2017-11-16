@@ -5,12 +5,12 @@ import FluentProvider
 import Foundation
 
 /// Here we have a controller that helps facilitate RESTful interactions with our object table
-class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updateable & ResponseRepresentable>: ResourceRepresentable {
+class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updateable & ResponseRepresentable>: RouteMaker {
    
     required init() {}
     
     func makeIndexQuery(fromParameters paramaters: Node?) throws -> Query<T> {
-        return try T.makeQuery()
+        return try T.makeQuery().sort(T.idKey, .ascending)
     }
     
     /// When users call 'GET' on the index path, it should return an index of all available posts
@@ -40,14 +40,70 @@ class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updatea
         return Response(status: .ok)
     }
 
+    class OngoingUpdates {
+        var queue: DispatchQueue
+        var count: Int
+        
+        init(_ queue: DispatchQueue) {
+            self.queue = queue
+            count = 0
+        }
+    }
+    
+    let ongoingUpdatesAccessQueue = DispatchQueue(label: "ongoingUpdatesAccessQueue")
+    var ongoingUpdates:[Int: OngoingUpdates] = [:]
+    
     /// When the user calls 'PATCH' on a specific resource, we should update that resource to the new values
-    func update(_ req: Request, resource: T) throws -> ResponseRepresentable {
-        // See `extension T: Updateable`
-        try resource.update(for: req)
+    func update(_ req: Request) throws -> ResponseRepresentable {
+        let id = try req.parameters.next(Int.self)
+        
+        // Safely check if there are ongoing updates. If there are, increment the queue. If there are not, start a new queue
+        let idOngoingUpdates: OngoingUpdates = ongoingUpdatesAccessQueue.sync {
+            let idOngoingUpdates: OngoingUpdates
+            
+            if let existingIdOngoingUpdates = ongoingUpdates[id] {
+                idOngoingUpdates = existingIdOngoingUpdates
+            } else {
+                let newIdOngoingUpdates = OngoingUpdates(DispatchQueue(label: "ongoingUpdatesQueueForId_\(id)"))
+                ongoingUpdates[id] = newIdOngoingUpdates
+                idOngoingUpdates = newIdOngoingUpdates
+            }
+            
+            idOngoingUpdates.count += 1
+            return idOngoingUpdates
+        }
 
-        // Save an return the updated resource.
-        try resource.save()
-        return resource
+        // Perform the update
+        let result: Result<T>
+        do {
+            result = try idOngoingUpdates.queue.sync {
+                guard let resource = try T.find(id) else {
+                    throw Abort.badRequest
+                }
+                            
+                try resource.update(for: req)
+                try resource.save()
+                return .success(resource)
+            }
+        } catch {
+            result = .failure(error)
+        }
+
+        // If there are no operations pending in the queue, remove it from the main dictionary
+        ongoingUpdatesAccessQueue.sync {
+            idOngoingUpdates.count -= 1
+            if idOngoingUpdates.count == 0 {
+                ongoingUpdates.removeValue(forKey: id)
+            } else {
+                print("jeje: \(idOngoingUpdates.count)")
+            }
+        }
+        
+        // Return the result
+        switch result {
+        case .success(let resource): return resource
+        case .failure(let error): throw error
+        }
     }
 
     /// When a user calls 'PUT' on a specific resource, we should replace any values that do not exist in the request with null. This is equivalent to creating a new object with the same ID.
@@ -69,16 +125,9 @@ class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updatea
         return new
     }
 
-    /// When making a controller, it is pretty flexible in that it only expects closures, this is useful for advanced scenarios, but most of the time, it should look almost identical to this implementation
-    func makeResource() -> Resource<T> {
-        return Resource(
-            index: index,
-            store: store,
-            show: show,
-            update: update,
-            replace: replace,
-            destroy: delete
-        )
+    func makeRoutes(path: String, drop: Droplet) {
+        drop.get(path, handler: index)
+        drop.patch(path, Int.parameter, handler: update)
     }
 }
 

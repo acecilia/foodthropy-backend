@@ -8,11 +8,10 @@ final class Location: Model {
     // MARK: Properties and database keys
     
     /// The column keys
-    static let idKey = "id"
     static let nameKey = "name"
     
     /// The column values
-    var name: String
+    let name: String
     
     /// Creates a new object
     init(name: String) {
@@ -87,7 +86,7 @@ extension Location: Updateable {
     public static var updateableKeys: [UpdateableKey<Location>] {
         return [
             // If the request contains a String at the key the setter callback will be called
-            UpdateableKey(Location.nameKey, String.self) { $0.name = $1 }
+            // UpdateableKey(Location.nameKey, String.self) { $0.name = $1 }
         ]
     }
 }
