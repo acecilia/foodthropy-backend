@@ -15,10 +15,10 @@ final class Restaurant: Model {
     private var locationId: Identifier
     private(set) var likes: Int
     
-    init(name: String, locationId: Identifier) {
+    init(name: String, locationId: Identifier, likes: Int = 0) {
         self.name = name
         self.locationId = locationId
-        self.likes = 0
+        self.likes = likes
     }
     
     init(row: Row) throws {
@@ -55,7 +55,8 @@ extension Restaurant: JSONConvertible {
     convenience init(json: JSON) throws {
         try self.init(
             name: json.get(Restaurant.nameKey),
-            locationId: json.get(Location.foreignIdKey)
+            locationId: json.get(Location.foreignIdKey),
+            likes: json.get(Restaurant.likesKey)
         )
     }
     

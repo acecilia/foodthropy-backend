@@ -9,7 +9,7 @@ class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updatea
    
     required init() {}
     
-    func makeIndexQuery(fromParameters paramaters: Node?) throws -> Query<T> {
+    func makeIndexQuery(fromParameters parameters: Node?) throws -> Query<T> {
         return try T.makeQuery().sort(T.idKey, .ascending)
     }
     

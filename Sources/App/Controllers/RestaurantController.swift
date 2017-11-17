@@ -1,10 +1,10 @@
 import FluentProvider
 
 final class RestaurantController: DefaultController<Restaurant> {
-    override func makeIndexQuery(fromParameters paramaters: Node?) throws -> Query<Restaurant> {
+    override func makeIndexQuery(fromParameters parameters: Node?) throws -> Query<Restaurant> {
         let query: Query<Restaurant>
         
-        if let locationId: Int = try paramaters?.get("locationid") {
+        if let locationId: Int = try parameters?.get("locationid") {
             if let locationId = try Location.makeQuery().find(locationId) {
                 query = try locationId.children(type: Restaurant.self)
                     .makeQuery()
@@ -16,6 +16,7 @@ final class RestaurantController: DefaultController<Restaurant> {
         }
         
         return try query
+            .filterName(fromParameters: parameters)
             .sort(Restaurant.likesKey, .descending)
             .sort(Restaurant.nameKey, .ascending)
     }

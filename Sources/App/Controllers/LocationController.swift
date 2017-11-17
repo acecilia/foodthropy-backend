@@ -1,4 +1,8 @@
-final class LocationController: DefaultController<Location> { }
+final class LocationController: DefaultController<Location> {
+    override func makeIndexQuery(fromParameters parameters: Node?) throws -> Query<Location> {
+        return try Location.makeQuery().filterName(fromParameters: parameters)
+    }
+}
 
 extension LocationController: DummyFillable {
     static func dummyFill() throws {
