@@ -2,7 +2,9 @@ import FluentProvider
 
 final class LocationController: DefaultController<Location> {
     override func makeIndexQuery(fromParameters parameters: Node?) throws -> Query<Location> {
-        return try Location.makeQuery().filterName(fromParameters: parameters)
+        return try Location.makeQuery()
+            .filterName(fromParameters: parameters)
+            .sort(Location.nameKey, .ascending)
     }
 }
 
