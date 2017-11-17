@@ -23,11 +23,27 @@ final class RestaurantController: DefaultController<Restaurant> {
 }
 
 extension RestaurantController: DummyFillable {
+    private static let types = [
+        "Chinese",
+        "Japanese",
+        "Western",
+        "Thai",
+        "Handmade noodles",
+        "Indian",
+        "Spruce",
+        "Pizza",
+        "McDonalds",
+        "Fish soup",
+        "Soup spoon",
+        "Economical rice",
+        "Vegetarian"
+    ]
+    
     static func dummyFill() throws {
-        let locations = try Location.makeQuery().limit(10).all()
+        let locations = try Location.makeQuery().all()
         for location in locations {
-            for number in 1...50 {
-                try Restaurant(name: "Location: \(location.id!.int!), Chinese \(number)", locationId: location.id!).save()
+            for type in types {
+                try Restaurant(name: type, locationId: location.id!).save()
             }
         }
     }

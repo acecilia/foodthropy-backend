@@ -8,9 +8,13 @@ final class LocationController: DefaultController<Location> {
 
 extension LocationController: DummyFillable {
     static func dummyFill() throws {
-        for number in 1...50 {
-            try Location(name: "Food Court \(number)").save()
+        for number in 1...11 {
+            try Location(name: "Food court \(number)").save()
         }
+        try Location(name: "Tamarin food court").save()
+        try Location(name: "North Hill food court").save()
+        try Location(name: "North Spine food court").save()
+        try Location(name: "South Spine food court").save()
     }
     
     static func delete() throws {
