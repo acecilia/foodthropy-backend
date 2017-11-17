@@ -10,7 +10,7 @@ final class LocationController: DefaultController<Location> {
 
 extension LocationController: DummyFillable {
     static func dummyFill() throws {
-        for number in 1...11 {
+        for number in 1...9 {
             try Location(name: "Food court \(number)").save()
         }
         try Location(name: "Tamarin food court").save()
