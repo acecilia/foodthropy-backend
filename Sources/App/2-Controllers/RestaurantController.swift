@@ -1,4 +1,5 @@
 import FluentProvider
+import Random
 
 final class RestaurantController: DefaultController<Restaurant> {
     override func makeIndexQuery(fromParameters parameters: Node?) throws -> Query<Restaurant> {
@@ -23,27 +24,28 @@ final class RestaurantController: DefaultController<Restaurant> {
 }
 
 extension RestaurantController: DummyFillable {
-    private static let dataPairs:[(name: String, likes: Int)] = [
-        ("Chinese", 5),
-        ("Japanese", 9),
-        ("Western", 20),
-        ("Thai", 19),
-        ("Handmade noodles", 45),
-        ("Indian", 14),
-        ("Spruce", 55),
-        ("Pizza", 67),
-        ("McDonalds", 0),
-        ("Fish soup", 2),
-        ("Soup spoon", 70),
-        ("Economical rice", 157),
-        ("Vegetarian", 97)
+    private static let types = [
+        "Chinese",
+        "Japanese",
+        "Western",
+        "Thai",
+        "Handmade noodles",
+        "Indian",
+        "Spruce",
+        "Pizza",
+        "McDonalds",
+        "Fish soup",
+        "Soup spoon",
+        "Economical rice",
+        "Vegetarian"
     ]
     
     static func dummyFill() throws {
         let locations = try Location.makeQuery().all()
         for location in locations {
-            for pair in dataPairs {
-                try Restaurant(name: pair.name, locationId: location.id!, likes: pair.likes).save()
+            
+            for type in types {
+                try Restaurant(name: type, locationId: location.id!, likes: Int.random(min: 0, max: 1500)).save()
             }
         }
     }
