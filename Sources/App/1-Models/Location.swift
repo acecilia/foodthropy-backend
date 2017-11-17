@@ -1,6 +1,4 @@
-import Vapor
 import FluentProvider
-import HTTP
 
 final class Location: Model {
     let storage = Storage()
