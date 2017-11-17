@@ -3,6 +3,7 @@ import HTTP
 import Paginator
 import FluentProvider
 import Foundation
+import Dispatch
 
 /// Here we have a controller that helps facilitate RESTful interactions with our object table
 class DefaultController<T: Model & NodeRepresentable & JSONConvertible & Updateable & ResponseRepresentable>: RouteMaker {
